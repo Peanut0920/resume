@@ -1,0 +1,593 @@
+import { useEffect, useRef, useState } from 'react'
+
+function GridCanvas() {
+  const ref = useRef(null)
+  useEffect(() => {
+    const canvas = ref.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d', { alpha: true })
+    let raf = 0
+    let offset = 0
+
+    const resize = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.8)
+      canvas.width = window.innerWidth * dpr
+      canvas.height = window.innerHeight * dpr
+      canvas.style.width = window.innerWidth + 'px'
+      canvas.style.height = window.innerHeight + 'px'
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
+    }
+    resize()
+    window.addEventListener('resize', resize)
+
+    const draw = () => {
+      const w = window.innerWidth
+      const h = window.innerHeight
+      ctx.clearRect(0, 0, w, h)
+
+      // perspective grid
+      const horizon = h * 0.42
+      const gridSize = 46
+      const speed = 0.7
+      offset = (offset + speed) % gridSize
+
+      ctx.save()
+      // vertical lines with perspective
+      ctx.strokeStyle = 'rgba(34,211,238,0.07)'
+      ctx.lineWidth = 1
+      for (let x = -w; x < w * 2; x += gridSize) {
+        const perspectiveX = (x - w / 2) * 0.08
+        ctx.beginPath()
+        ctx.moveTo(w / 2 + perspectiveX * 3, horizon)
+        ctx.lineTo(x, h)
+        ctx.stroke()
+      }
+      // horizontal lines moving (depth illusion)
+      ctx.strokeStyle = 'rgba(139,92,246,0.08)'
+      for (let y = horizon; y < h; y += gridSize) {
+        const yy = y + offset
+        if (yy < horizon || yy > h) continue
+        const t = (yy - horizon) / (h - horizon) // 0 at horizon, 1 at bottom
+        const alpha = 0.05 + t * 0.12
+        ctx.strokeStyle = `rgba(34,211,238,${alpha * 0.6})`
+        // perspective shrink near horizon
+        const inset = (1 - t) * w * 0.35
+        ctx.beginPath()
+        ctx.moveTo(inset, yy)
+        ctx.lineTo(w - inset, yy)
+        ctx.stroke()
+      }
+
+      // floating nodes / stars
+      const time = Date.now() * 0.0004
+      for (let i = 0; i < 22; i++) {
+        const ix = (Math.sin(i * 1.7 + time * 0.7) * 0.5 + 0.5) * w
+        const iy = (Math.cos(i * 1.3 + time * 0.5) * 0.5 + 0.5) * (h * 0.7) + h * 0.1
+        const r = 1 + Math.sin(i * 2.1 + time * 2) * 0.7
+        const a = 0.35 + Math.sin(i + time * 1.2) * 0.2
+        ctx.fillStyle = i % 3 === 0 ? `rgba(34,211,238,${a})` : i % 3 === 1 ? `rgba(139,92,246,${a})` : `rgba(34,197,94,${a})`
+        ctx.shadowBlur = 8
+        ctx.shadowColor = ctx.fillStyle
+        ctx.beginPath()
+        ctx.arc(ix, iy, r, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.shadowBlur = 0
+        // connection line to nearby nodes (very subtle)
+        if (i < 12) {
+          const jx = (Math.sin((i + 1) * 1.7 + time * 0.7) * 0.5 + 0.5) * w
+          const jy = (Math.cos((i + 1) * 1.3 + time * 0.5) * 0.5 + 0.5) * (h * 0.7) + h * 0.1
+          const dist = Math.hypot(jx - ix, jy - iy)
+          if (dist < 200) {
+            ctx.strokeStyle = `rgba(34,211,238,${0.06 * (1 - dist / 200)})`
+            ctx.beginPath()
+            ctx.moveTo(ix, iy)
+            ctx.lineTo(jx, jy)
+            ctx.stroke()
+          }
+        }
+      }
+
+      // vignette
+      const grad = ctx.createRadialGradient(w / 2, h / 2, 0, w / 2, h / 2, Math.max(w, h) * 0.9)
+      grad.addColorStop(0, 'transparent')
+      grad.addColorStop(1, 'rgba(5,7,13,0.65)')
+      ctx.fillStyle = grad
+      ctx.fillRect(0, 0, w, h)
+
+      ctx.restore()
+      raf = requestAnimationFrame(draw)
+    }
+    draw()
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', resize)
+    }
+  }, [])
+  return <canvas id="grid-canvas" ref={ref} aria-hidden />
+}
+
+function useTilt() {
+  const onMove = (e) => {
+    const el = e.currentTarget
+    const rect = el.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    const cx = rect.width / 2
+    const cy = rect.height / 2
+    const rx = ((y - cy) / cy) * -6
+    const ry = ((x - cx) / cx) * 8
+    el.style.transform = `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateZ(0) translateY(-3px)`
+  }
+  const onLeave = (e) => {
+    e.currentTarget.style.transform = 'perspective(900px) rotateX(0) rotateY(0) translateZ(0)'
+  }
+  return { onMove, onLeave }
+}
+
+export default function App() {
+  const [navOpen, setNavOpen] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [modal, setModal] = useState({ open: false, src: '', caption: '', fallback: false })
+  const [avatar, setAvatar] = useState(() => {
+    try { return localStorage.getItem('enson_avatar') || '' } catch { return '' }
+  })
+  const fileInputRef = useRef(null)
+  const sceneRef = useRef(null)
+  const [typed, setTyped] = useState('')
+  const codeString = `const enson = {
+  name: "Enson Chuan Chen Chun",
+  role: "AI Engineer  •  Data Scientist",
+  university: "Xiamen University Malaysia",
+  focus: ["Machine Learning", "Deep Learning", "NLP"],
+  stack: { lang: ["Python", "C/C++"], libs: ["TensorFlow", "scikit-learn", "pandas"] },
+  traits: ["detail-oriented", "reliable", "fast-learner"],
+  expected: "2027-09",
+  location: "Skudai, Johor, MY"
+};`
+
+  // typing effect
+  useEffect(() => {
+    let i = 0
+    let dir = 1
+    let timeout
+    const tick = () => {
+      if (dir === 1) {
+        setTyped(codeString.slice(0, i + 1))
+        i++
+        if (i === codeString.length) {
+          dir = -1
+          timeout = setTimeout(tick, 1800)
+          return
+        }
+        timeout = setTimeout(tick, 10)
+      } else {
+        // pause at end, then restart
+        i = 0
+        dir = 1
+        setTyped('')
+        timeout = setTimeout(tick, 400)
+      }
+    }
+    timeout = setTimeout(tick, 500)
+    return () => clearTimeout(timeout)
+  }, [])
+
+  // progress + reveal + bars
+  useEffect(() => {
+    let tick = false
+    const onScroll = () => {
+      if (tick) return
+      tick = true
+      requestAnimationFrame(() => {
+        const st = window.scrollY
+        const dh = document.documentElement.scrollHeight - window.innerHeight
+        setProgress(dh > 0 ? (st / dh) * 100 : 0)
+        tick = false
+      })
+    }
+    window.addEventListener('scroll', onScroll, { passive: true })
+    onScroll()
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  useEffect(() => {
+    const reveals = document.querySelectorAll('.reveal')
+    const ro = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) e.target.classList.add('visible') })
+    }, { threshold: 0.14, rootMargin: '0px 0px -30px 0px' })
+    reveals.forEach((el) => ro.observe(el))
+    const fills = document.querySelectorAll('.fill')
+    const fo = new IntersectionObserver((entries) => {
+      entries.forEach((e) => { if (e.isIntersecting) e.target.style.width = e.target.dataset.width + '%' })
+    }, { threshold: 0.3 })
+    fills.forEach((f) => fo.observe(f))
+    return () => { ro.disconnect(); fo.disconnect() }
+  }, [])
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') closeModal() }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = modal.open ? 'hidden' : ''
+    return () => { document.removeEventListener('keydown', onKey); document.body.style.overflow = '' }
+  }, [modal.open])
+
+  // hero 3D mouse follow
+  useEffect(() => {
+    const el = sceneRef.current
+    if (!el) return
+    const onMove = (e) => {
+      const rect = el.getBoundingClientRect()
+      const x = (e.clientX - rect.left) / rect.width - 0.5
+      const y = (e.clientY - rect.top) / rect.height - 0.5
+      el.style.transform = `rotateX(${ -y * 10 + 6 }deg) rotateY(${ x * 14 - 10 }deg)`
+    }
+    const onLeave = () => { el.style.transform = 'rotateX(6deg) rotateY(-10deg)' }
+    const parent = el.parentElement
+    parent.addEventListener('mousemove', onMove)
+    parent.addEventListener('mouseleave', onLeave)
+    return () => { parent.removeEventListener('mousemove', onMove); parent.removeEventListener('mouseleave', onLeave) }
+  }, [])
+
+  const openModal = (src, caption) => setModal({ open: true, src, caption: caption || 'Preview', fallback: false })
+  const closeModal = () => setModal((m) => ({ ...m, open: false }))
+  const handleAvatarClick = () => fileInputRef.current?.click()
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) { alert('Please upload an image file.'); e.target.value = ''; return }
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const dataUrl = ev.target.result
+      setAvatar(dataUrl)
+      try { localStorage.setItem('enson_avatar', dataUrl) } catch {}
+    }
+    reader.readAsDataURL(file)
+  }
+  const tilt = useTilt()
+
+  return (
+    <>
+      <div className="bg-root" />
+      <GridCanvas />
+      <div className="grid-overlay" />
+      <div id="progress" style={{ width: `${progress}%` }} />
+
+      <nav className="nav">
+        <div className="nav-inner">
+          <a className="nav-brand" href="#top">
+            <div className="window-dots"><span /><span /><span /></div>
+            <div className="brand-prompt"><i className="fas fa-terminal" /><b>enson@xmum</b>:~$ <span style={{ color: 'var(--muted-2)' }}>portfolio</span></div>
+          </a>
+          <div className={`nav-links ${navOpen ? 'open' : ''}`}>
+            <a href="#profile" onClick={() => setNavOpen(false)}><span>01</span> <em>--profile</em></a>
+            <a href="#education" onClick={() => setNavOpen(false)}><span>02</span> <em>--education</em></a>
+            <a href="#skills" onClick={() => setNavOpen(false)}><span>03</span> <em>--skills</em></a>
+            <a href="#experience" onClick={() => setNavOpen(false)}><span>04</span> <em>--experience</em></a>
+            <a href="#achievements" onClick={() => setNavOpen(false)}><span>05</span> <em>--awards</em></a>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '.6rem' }}>
+            <a className="nav-cta" href="mailto:yinkang90804586@gmail.com"><i className="fas fa-bolt" /> hire_me.sh</a>
+            <button className="nav-toggle" aria-label="Menu" onClick={() => setNavOpen((o) => !o)} style={{ display: 'grid' }}>
+              <i className={`fas ${navOpen ? 'fa-xmark' : 'fa-bars'}`} />
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <header className="hero" id="top">
+        <div className="hero-left">
+          <div className="hero-badge"><dot /> open to internship - BSc AI 2027 - Skudai, Johor</div>
+          <h1>
+            AI engineer<br />
+            <span className="accent">building reliable</span><br />
+            <span className="mono">&lt;data-driven /&gt;</span> systems
+          </h1>
+          <p className="hero-lead">
+            I&apos;m <strong>Enson Chuan Chen Chun</strong> — detail-oriented AI student at <strong>Xiamen University Malaysia</strong> with hands-on <strong>ML, neural networks & Python</strong>. I pair analytical rigor + <strong>accounting foundations</strong> to ship practical, documented solutions.
+          </p>
+
+          <div className="code-window" style={{ marginTop: '1.3rem' }}>
+            <div className="code-head">
+              <div className="code-head-left">
+                <div className="code-dots"><span /><span /><span /></div>
+                <div className="code-title"><i className="fas fa-code" /> <b>enson.config.js</b> — ~/portfolio</div>
+              </div>
+              <div className="code-actions"><i className="fas fa-copy" title="copy" /><i className="fas fa-expand" /></div>
+            </div>
+            <div className="code-body">
+              <pre className="code-pre">{typed}<span className="code-cursor" /></pre>
+            </div>
+          </div>
+
+          <div className="hero-actions">
+            <a className="btn-primary" href={`${import.meta.env.BASE_URL}Enson resume.pdf`} download><i className="fas fa-download" /> download cv.pdf</a>
+            <a className="btn-ghost" href="mailto:yinkang90804586@gmail.com"><i className="fas fa-paper-plane" /> yinkang90804586@gmail.com</a>
+          </div>
+          <div className="hero-meta">
+            <a href="tel:+60195897668"><i className="fas fa-phone" /> 019-589 7668</a>
+            <a href="mailto:yinkang90804586@gmail.com"><i className="fas fa-envelope" /> email</a>
+            <span><i className="fas fa-location-dot" /> Skudai - Johor Bahru</span>
+            <span><i className="fas fa-graduation-cap" /> XMUM - AI - 2027</span>
+          </div>
+        </div>
+
+        <div className="hero-3d">
+          <div className="scene-stage" ref={sceneRef} style={{ transform: 'rotateX(6deg) rotateY(-10deg)' }}>
+            {/* Layer 1: code preview */}
+            <div className="layer layer-1">
+              <div className="layer-head"><span><i className="fas fa-layer-group" /> neural_net.py</span><span style={{ color: 'var(--lime)' }}>● running</span></div>
+              <div className="layer-body">
+                <pre className="code-pre" style={{ fontSize: '.74rem', lineHeight: 1.6 }}>{`import torch
+model = Transformer(
+  d_model=512, heads=8
+)
+loss = train(model, data)
+print(f"loss: {loss:.4f}")`}</pre>
+                <div className="mini-stat">
+                  <div className="mini-pill"><strong>86%</strong><span>Python</span></div>
+                  <div className="mini-pill"><strong>82%</strong><span>ML / DL</span></div>
+                  <div className="mini-pill"><strong>5 A/A+</strong><span>SPM</span></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Layer 2: data viz */}
+            <div className="layer layer-2">
+              <div className="layer-head"><span><i className="fas fa-chart-simple" /> metrics.json</span><span>latency 12ms</span></div>
+              <div className="layer-body" style={{ display: 'grid', gap: '.6rem' }}>
+                <div style={{ display: 'flex', gap: '.5rem', flexWrap: 'wrap' }}>
+                  <span className="tag" style={{ background: 'rgba(34,197,94,.1)', borderColor: 'rgba(34,197,94,.2)', color: '#4ade80' }}>● trained</span>
+                  <span className="tag">pandas</span><span className="tag">TensorFlow</span><span className="tag">scikit-learn</span>
+                </div>
+                <div style={{ height: '52px', display: 'flex', alignItems: 'flex-end', gap: '4px' }}>
+                  {[40, 68, 45, 82, 60, 86, 72, 90].map((h, i) => (
+                    <div key={i} style={{ flex: 1, height: `${h}%`, background: `linear-gradient(180deg, var(--cyan), var(--violet))`, borderRadius: '6px 6px 2px 2px', opacity: 0.85 + i * 0.02, boxShadow: '0 0 10px rgba(34,211,238,.35)' }} />
+                  ))}
+                </div>
+                <div style={{ fontFamily: 'var(--mono)', fontSize: '.68rem', color: 'var(--muted)', display: 'flex', justifyContent: 'space-between' }}>
+                  <span>epochs: 120</span><span style={{ color: 'var(--lime)' }}>accuracy 94.2%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Layer 3: profile 3D */}
+            <div className="layer layer-3">
+              <div style={{ textAlign: 'center', padding: '1rem .8rem' }}>
+                <div style={{ position: 'relative', display: 'grid', placeItems: 'center', marginBottom: '.7rem' }}>
+                  <div className="avatar-ring" />
+                  <div className="avatar-3d" onClick={handleAvatarClick}>
+                    {avatar ? <img src={avatar} alt="Enson" /> : <i className="fas fa-user-astronaut ph" />}
+                  </div>
+                </div>
+                <div style={{ fontWeight: 800, fontSize: '.92rem', letterSpacing: '-.02em' }}>Enson Chuan</div>
+                <div style={{ fontFamily: 'var(--mono)', fontSize: '.72rem', color: 'var(--muted)' }}>BSc AI - XMUM - 2027</div>
+                <div style={{ fontFamily: 'var(--mono)', fontSize: '.62rem', color: 'var(--muted-2)', marginTop: '.35rem' }}>click avatar to upload</div>
+                <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={handleFileChange} style={{ display: 'none' }} />
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section className="section" id="profile">
+        <div className="section-head">
+          <div>
+            <div className="section-label"><i className="fas fa-terminal" /> 01 — profile</div>
+            <h2 className="section-title"><code>class</code> Enson <span style={{ color: 'var(--muted)', fontWeight: 500, fontSize: '.95rem', fontFamily: 'var(--mono)' }}>: motivated, detail-oriented</span></h2>
+          </div>
+          <p className="section-desc">Pairs technical execution with honesty, reliability and time-management — ready for dynamic AI roles.</p>
+        </div>
+        <div className="grid-3 reveal">
+          <div className="code-card tilt" onMouseMove={tilt.onMove} onMouseLeave={tilt.onLeave}>
+            <div className="code-card-head"><span><i className="fas fa-microchip" /> ai_foundations.py</span><b>core</b></div>
+            <div className="code-card-body">
+              <h3><i className="fas fa-brain" /> AI & Data Foundations</h3>
+              <p>ML, neural networks, Python pipelines and statistical analysis for practical problem solving.</p>
+              <div className="tag-row"><span className="tag">analytical</span><span className="tag">problem-solving</span><span className="tag">teamwork</span></div>
+            </div>
+          </div>
+          <div className="code-card tilt" onMouseMove={tilt.onMove} onMouseLeave={tilt.onLeave}>
+            <div className="code-card-head"><span><i className="fas fa-calculator" /> accounting.ledger</span><b>finance</b></div>
+            <div className="code-card-body">
+              <h3><i className="fas fa-book" /> Accounting Foundations</h3>
+              <p>Double-entry, trial balances, IS & BS — fast adaptation to SQL, Autocount & UBS.</p>
+              <div className="tag-row"><span className="tag">double-entry</span><span className="tag">financial statements</span><span className="tag">detail-oriented</span></div>
+            </div>
+          </div>
+          <div className="code-card tilt" onMouseMove={tilt.onMove} onMouseLeave={tilt.onLeave}>
+            <div className="code-card-head"><span><i className="fas fa-screwdriver-wrench" /> tools.sh</span><b>execution</b></div>
+            <div className="code-card-body">
+              <h3><i className="fas fa-gear" /> Software & Execution</h3>
+              <p>Excel (formulas), Word, plus fast learner for new stacks and responsible delivery.</p>
+              <div className="tag-row"><span className="tag">excel</span><span className="tag">word</span><span className="tag">SQL - Autocount - UBS</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section" id="education">
+        <div className="section-head">
+          <div>
+            <div className="section-label"><i className="fas fa-graduation-cap" /> 02 — education</div>
+            <h2 className="section-title">Foundation → <span style={{ color: 'var(--cyan)' }}>BSc AI</span></h2>
+          </div>
+          <p className="section-desc">Science-grounded progression from foundation physics to ML, NLP and intelligent agents.</p>
+        </div>
+        <div className="timeline reveal">
+          <div className="tline" />
+          <div className="t-item">
+            <div><span className="t-dot" /></div>
+            <div>
+              <div className="t-year">2023 — 2027 - expected</div>
+              <h3>Bachelor&apos;s Degree in Artificial Intelligence</h3>
+              <div className="sub">Xiamen University Malaysia — Sepang, Selangor</div>
+              <div className="t-meta"><span>4-year programme</span><span>undergraduate</span><span>Malaysia</span></div>
+              <div className="t-modules"><span>Machine Learning</span><span>Deep Learning</span><span>NLP</span><span>Computer Vision</span><span>Robotics</span><span>AI Algorithms</span><span>Data Mining</span><span>Data Structures</span><span>Statistics & Probability</span><span>Intelligent Agents</span><span>Ethics in AI</span></div>
+              <div style={{ marginTop: '.8rem' }}><button className="link-btn" onClick={() => openModal('https://picsum.photos/800/600?random=1', 'Bachelor’s Degree — XMUM')}><i className="fas fa-certificate" /> view_certificate</button></div>
+            </div>
+          </div>
+          <div className="t-item">
+            <div><span className="t-dot" /></div>
+            <div>
+              <div className="t-year">2022 — 2023</div>
+              <h3>Foundation in Science</h3>
+              <div className="sub">Xiamen University Malaysia — Sepang, Selangor</div>
+              <div className="t-meta"><span>science foundation</span><span>completed</span></div>
+              <div className="t-modules"><span>Chemistry</span><span>Physics</span><span>Advanced Math</span><span>Fundamental CS</span><span>English for Academic Purposes</span><span>Study Skills</span><span>Effective Presentation</span><span>Ethics in Science</span></div>
+              <div style={{ marginTop: '.8rem' }}><button className="link-btn" onClick={() => openModal('https://picsum.photos/800/600?random=2', 'Foundation in Science — XMUM')}><i className="fas fa-certificate" /> view_certificate</button></div>
+            </div>
+          </div>
+          <div className="t-item">
+            <div><span className="t-dot" /></div>
+            <div>
+              <div className="t-year">completed 2022</div>
+              <h3>Sijil Pelajaran Malaysia (SPM)</h3>
+              <div className="sub">SMK Taman Selesa Jaya 1</div>
+              <div className="t-meta"><span style={{ color: '#fbbf24' }}>★ 5× A / A+</span><span>distinction</span></div>
+              <div className="t-modules"><span>Accounting <strong>A</strong></span><span>Chemistry <strong>A+</strong></span><span>Mathematics <strong>A+</strong></span><span>Physics <strong>A+</strong></span><span>Add. Maths <strong>A+</strong></span><span>Biology <strong>A-</strong></span><span>BM & English <strong>B+</strong></span><span>History <strong>A</strong></span></div>
+              <div style={{ marginTop: '.8rem' }}><button className="link-btn" onClick={() => openModal('https://picsum.photos/800/600?random=3', 'SPM Certificate — SMK Taman Selesa Jaya 1')}><i className="fas fa-certificate" /> view_certificate</button></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section" id="skills">
+        <div className="section-head">
+          <div>
+            <div className="section-label"><i className="fas fa-code" /> 03 — capabilities</div>
+            <h2 className="section-title">stack <span style={{ color: 'var(--muted)', fontWeight: 500, fontFamily: 'var(--mono)', fontSize: '.95rem' }}>&& tooling</span></h2>
+          </div>
+          <p className="section-desc">T-shaped: depth in AI engineering, breadth in data, accounting and collaborative delivery.</p>
+        </div>
+        <div className="grid-2 reveal">
+          <div className="skill-card tilt" onMouseMove={tilt.onMove} onMouseLeave={tilt.onLeave}>
+            <h4><i className="fas fa-layer-group" /> core AI & data stack</h4>
+            <div className="bar-row">
+              <div><div className="bar-head"><span>Python</span><span>proficient</span></div><div className="track"><div className="fill" data-width="86" /></div></div></div>
+              <div><div className="bar-head"><span>Machine Learning</span><span>proficient</span></div><div className="track"><div className="fill" data-width="82" /></div></div></div>
+              <div><div className="bar-head"><span>Data Analysis</span><span>strong</span></div><div className="track"><div className="fill" data-width="78" /></div></div></div>
+              <div><div className="bar-head"><span>NLP CV</span><span>developing</span></div><div className="track"><div className="fill" data-width="70" /></div></div></div>
+              <div><div className="bar-head"><span>C Cpp</span><span>familiar</span></div><div className="track"><div className="fill" data-width="62" /></div></div></div>
+            </div>
+            <div style={{ marginTop: '1rem' }} className="chip-grid">
+              <span className="chip chip--cyan"><i className="fab fa-python" /> Python</span>
+              <span className="chip"><i className="fas fa-brain" /> scikit-learn</span>
+              <span className="chip"><i className="fas fa-network-wired" /> TensorFlow</span>
+              <span className="chip"><i className="fas fa-table" /> pandas - NumPy</span>
+              <span className="chip"><i className="fas fa-chart-simple" /> Matplotlib</span>
+              <span className="chip"><i className="fas fa-database" /> SQL</span>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gap: '1rem' }}>
+            <div className="skill-card tilt" onMouseMove={tilt.onMove} onMouseLeave={tilt.onLeave}>
+              <h4><i className="fas fa-briefcase" /> professional attributes</h4>
+              <div className="chip-grid">
+                <span className="chip chip--cyan"><i className="fas fa-crosshairs" /> detail-oriented</span>
+                <span className="chip"><i className="fas fa-scale-balanced" /> honest & reliable</span>
+                <span className="chip"><i className="fas fa-bolt" /> fast learner</span>
+                <span className="chip"><i className="fas fa-people-group" /> team player</span>
+                <span className="chip"><i className="fas fa-clock" /> time management</span>
+                <span className="chip"><i className="fas fa-lightbulb" /> problem solver</span>
+              </div>
+              <p style={{ marginTop: '.75rem', fontFamily: 'var(--mono)', fontSize: '.78rem', color: 'var(--muted)', lineHeight: 1.6 }}>Eager to learn, responsible — owns tasks from data entry to model docs and stakeholder demos.</p>
+            </div>
+            <div className="skill-card tilt" onMouseMove={tilt.onMove} onMouseLeave={tilt.onLeave}>
+              <h4><i className="fas fa-calculator" /> finance & tools</h4>
+              <div className="chip-grid">
+                <span className="chip"><i className="fas fa-book" /> double-entry</span>
+                <span className="chip"><i className="fas fa-file-invoice" /> trial balance</span>
+                <span className="chip"><i className="fas fa-chart-pie" /> income statement</span>
+                <span className="chip"><i className="fas fa-scale-unbalanced" /> balance sheet</span>
+                <span className="chip chip--violet"><i className="fas fa-table-cells" /> Excel - Word</span>
+                <span className="chip"><i className="fas fa-gear" /> SQL - Autocount - UBS</span>
+              </div>
+              <div style={{ marginTop: '.75rem', display: 'flex', flexWrap: 'wrap', gap: '.35rem' }}>
+                <span className="tag">BM — native</span><span className="tag">Mandarin — fluent</span><span className="tag" style={{ background: 'rgba(139,92,246,.1)', borderColor: 'rgba(139,92,246,.18)', color: 'var(--violet-2)' }}>English — working</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="section" id="experience">
+        <div className="section-head">
+          <div>
+            <div className="section-label"><i className="fas fa-rocket" /> 04 — experience</div>
+            <h2 className="section-title">service <span style={{ color: 'var(--muted)', fontFamily: 'var(--mono)', fontWeight: 500, fontSize: '.9rem' }}>& leadership_</span></h2>
+          </div>
+          <p className="section-desc">First-aid service, cultural troupe, retail ops and campus event delivery.</p>
+        </div>
+        <div className="exp-grid reveal">
+          {[
+            { role: 'President', org: 'First Aid Society', icon: 'fa-crown', desc: 'Led planning, training & recruitment; represented society in showcases.', when: '1 Year', rnd: 10 },
+            { role: 'Advisor', org: 'First Aid Society', icon: 'fa-user-tie', desc: 'Mentored junior committee, ensured continuity across handover.', when: '1 Year', rnd: 11 },
+            { role: 'Vice President', org: 'First Aid Society', icon: 'fa-users-gear', desc: 'Coordinated duties & schedules; deputised for president.', when: '1 Year', rnd: 12 },
+            { role: 'Multi-Media', org: 'First Aid Society', icon: 'fa-photo-film', desc: 'Produced coverage, posters & edits; maintained visual consistency.', when: '1 Year', rnd: 14 },
+            { role: 'Vice President', org: 'Dragon & Lion Dance', icon: 'fa-dragon', desc: 'Trained & performed for cultural events with disciplined practice.', when: '1 Year', rnd: 13 },
+            { role: 'Part-Time Cashier', org: 'Lapasta', icon: 'fa-cash-register', desc: 'POS & customer service in fast-paced F&B with accuracy.', when: '1 Year', rnd: 15 },
+            { role: 'Event Planner', org: 'Xnergy Sport Carnival', icon: 'fa-calendar-check', desc: 'End-to-end logistics & on-site coordination for campus carnival.', when: 'Campus', rnd: 16 },
+          ].map((e) => (
+            <div key={e.rnd} className="exp-card tilt" onMouseMove={tilt.onMove} onMouseLeave={tilt.onLeave} onClick={() => openModal(`https://picsum.photos/800/600?random=${e.rnd}`, `${e.role} — ${e.org}`)}>
+              <div className="exp-top"><div className="exp-icon"><i className={`fas ${e.icon}`} /></div><div><div className="exp-role">{e.role}</div><div className="exp-org">{e.org}</div></div></div>
+              <div className="exp-desc">{e.desc}</div>
+              <div className="exp-foot"><span className="exp-when">{e.when}</span><span className="exp-hint"><i className="fas fa-image" /> view</span></div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="section" id="achievements">
+        <div className="section-head">
+          <div>
+            <div className="section-label"><i className="fas fa-trophy" /> 05 — recognition</div>
+            <h2 className="section-title">awards <span style={{ color: 'var(--muted)', fontFamily: 'var(--mono)', fontWeight: 500, fontSize: '.9rem' }}>.certifications</span></h2>
+          </div>
+          <p className="section-desc">Finalist recognitions + certified first-aid competency.</p>
+        </div>
+        <div className="ach-grid reveal">
+          <div className="ach-card tilt" onMouseMove={tilt.onMove} onMouseLeave={tilt.onLeave}><div className="ach-icon"><i className="fas fa-trophy" /></div><div><h4>XMUM Leader of the Year — Finalist</h4><p>Top student leaders for impact & service.</p></div></div>
+          <div className="ach-card tilt" onMouseMove={tilt.onMove} onMouseLeave={tilt.onLeave}><div className="ach-icon"><i className="fas fa-lightbulb" /></div><div><h4>Best Innovative Event — Finalist</h4><p>Noted for creativity & engagement.</p></div></div>
+          <div className="ach-card tilt" onMouseMove={tilt.onMove} onMouseLeave={tilt.onLeave}><div className="ach-icon"><i className="fas fa-medal" /></div><div><h4>Most Active Non-Sport Club — Finalist</h4><p>First Aid Society — consistent outreach.</p></div></div>
+          <div className="ach-card tilt" onMouseMove={tilt.onMove} onMouseLeave={tilt.onLeave}><div className="ach-icon"><i className="fas fa-heart-pulse" /></div><div><h4>Basic Occupational First Aid, CPR & AED</h4><p>Certified emergency response competency.</p></div></div>
+        </div>
+      </section>
+
+      <div className="cta reveal">
+        <div className="cta-inner tilt" onMouseMove={tilt.onMove} onMouseLeave={tilt.onLeave}>
+          <div>
+            <h2>let&apos;s build <em>useful_</em></h2>
+            <p>Open to internships & collaborations — AI, data, disciplined execution. Fast response via email/phone.</p>
+          </div>
+          <div className="cta-actions">
+            <a className="cta-primary" href="mailto:yinkang90804586@gmail.com"><i className="fas fa-paper-plane" /> email_enson()</a>
+            <a className="cta-secondary" href="tel:+60195897668"><i className="fas fa-phone" /> 019-589 7668</a>
+            <a className="cta-secondary" href={`${import.meta.env.BASE_URL}Enson resume.pdf`} download><i className="fas fa-file-pdf" /> download cv.pdf</a>
+          </div>
+        </div>
+      </div>
+
+      <footer className="footer">
+        <div>© 2026 Enson Chuan Chen Chun - <span style={{ color: 'var(--cyan)' }}>Skudai, Johor</span> - crafted with code & care — <i className="fas fa-code" style={{ color: 'var(--violet-2)' }} /></div>
+        <div style={{ display: 'flex', gap: '1.2rem' }}>
+          <a href="mailto:yinkang90804586@gmail.com"><i className="fas fa-envelope" /> email</a>
+          <a href="tel:+60195897668"><i className="fas fa-phone" /> phone</a>
+          <a href="#top"><i className="fas fa-arrow-up" /> top</a>
+        </div>
+      </footer>
+
+      {modal.open && (
+        <div className="modal" role="dialog" aria-modal="true" onClick={(e) => { if (e.target === e.currentTarget) closeModal() }}>
+          <div className="modal-box">
+            <div className="modal-head"><h3>{modal.caption}</h3><button onClick={closeModal}><i className="fas fa-xmark" /></button></div>
+            <div className="modal-body">
+              {!modal.fallback ? <img src={modal.src} alt="Preview" onError={() => setModal((m) => ({ ...m, fallback: true }))} /> : (
+                <div className="modal-fallback"><i className="fas fa-image" /><p>Preview not available</p><p style={{ fontSize: '.78rem', maxWidth: '32ch' }}>Replace with local file e.g. <code>certs/spm.jpg</code></p></div>
+              )}
+            </div>
+            <div className="modal-foot">Click outside or press Esc to close</div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
