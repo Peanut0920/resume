@@ -384,7 +384,7 @@ export default function App() {
           </p>
           <div className="hero-actions">
             <a className="btn-primary" href={import.meta.env.BASE_URL + 'Enson resume.pdf'} download><i className="fas fa-download" /> Get CV</a>
-            <a className="btn-ghost" href="https://wa.me/qr/G25VRBSWXPBED1" target="_blank" rel="noopener noreferrer"><i className="fab fa-whatsapp" /> WhatsApp</a>
+            <a className="btn-ghost" href="https://wa.me/0195897668" target="_blank" rel="noopener noreferrer"><i className="fab fa-whatsapp" /> WhatsApp</a>
           </div>
           <div style={{ marginTop: '.9rem', display: 'flex', alignItems: 'center', gap: '.6rem', fontSize: '.72rem', color: 'var(--muted)', fontFamily: 'var(--mono)', flexWrap: 'wrap' }}>
             <span><i className="fas fa-phone" /> 0195897668</span>
@@ -624,7 +624,7 @@ export default function App() {
         </div>
         <div className="cta-actions">
           <a className="btn-primary" href={import.meta.env.BASE_URL + 'Enson resume.pdf'} download><i className="fas fa-download" /> Get CV</a>
-          <a className="btn-ghost" href="https://wa.me/qr/G25VRBSWXPBED1" target="_blank" rel="noopener noreferrer"><i className="fab fa-whatsapp" /> WhatsApp — 019-589 7668</a>
+          <a className="btn-ghost" href="https://wa.me/0195897668" target="_blank" rel="noopener noreferrer"><i className="fab fa-whatsapp" /> WhatsApp — 019-589 7668</a>
         </div>
       </section>
 
