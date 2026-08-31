@@ -358,12 +358,13 @@ export default function App() {
         <div className="nav-inner">
           <a className="nav-brand" href="#top">resume</a>
           <div className={navOpen ? 'nav-links open' : 'nav-links'}>
-            <a href="#socials" onClick={() => setNavOpen(false)}>Socials</a>
+            <a href="#top" onClick={() => setNavOpen(false)}>Enson</a>
             <a href="#education" onClick={() => setNavOpen(false)}>Education</a>
-            <a href="#skills" onClick={() => setNavOpen(false)}>Skills</a>
-            <a href="#work" onClick={() => setNavOpen(false)}>Work</a>
+            <a href="#skills" onClick={() => setNavOpen(false)}>Core Skill</a>
+            <a href="#work" onClick={() => setNavOpen(false)}>Previous Work</a>
             <a href="#experience" onClick={() => setNavOpen(false)}>Experience</a>
-            <a href="#achievements" onClick={() => setNavOpen(false)}>Awards</a>
+            <a href="#achievements" onClick={() => setNavOpen(false)}>Award</a>
+            <a href="#socials" onClick={() => setNavOpen(false)}>Social</a>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '.6rem' }}>
             <a className="nav-cta ghost" href="mailto:yinkang90804586@gmail.com" style={{ display: 'none' }}>Login</a>
@@ -379,11 +380,11 @@ export default function App() {
         <div>
           <h1>Enson<br /><i>Chuan</i> <b>Chen Chun</b></h1>
           <p className="hero-sub">
-            A motivated and detail-oriented individual currently pursuing a comprehensive course in Artificial Intelligence, with hands-on experience in machine learning, neural networks, and Python programming. Passionate about leveraging AI to solve real-world challenges and eager to apply technical knowledge in a dynamic role. Strong analytical, problem-solving, and teamwork skills.
+            Python-powered AI Trainer specializing in aligning large language models for enterprise reliability. I architect end-to-end fine-tuning pipelines and implement RLHF reward models to drastically reduce hallucinations. I bridge cutting-edge research with production-grade, cost-efficient AI solutions. AI Trainer & Python developer driving hallucination-free LLMs. I build custom SFT/RLHF pipelines, optimize inference with vLLM, and turn raw data into enterprise-grade conversational AI that delivers measurable business impact.
           </p>
           <div className="hero-actions">
             <a className="btn-primary" href={import.meta.env.BASE_URL + 'Enson resume.pdf'} download><i className="fas fa-download" /> Get CV</a>
-            <a className="btn-ghost" href="mailto:yinkang90804586@gmail.com"><i className="fas fa-paper-plane" /> Contact</a>
+            <a className="btn-ghost" href="https://wa.me/qr/G25VRBSWXPBED1" target="_blank" rel="noopener noreferrer"><i className="fab fa-whatsapp" /> WhatsApp</a>
           </div>
           <div style={{ marginTop: '.9rem', display: 'flex', alignItems: 'center', gap: '.6rem', fontSize: '.72rem', color: 'var(--muted)', fontFamily: 'var(--mono)', flexWrap: 'wrap' }}>
             <span><i className="fas fa-phone" /> 0195897668</span>
@@ -417,36 +418,7 @@ export default function App() {
           <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={onFile} style={{ display: 'none' }} />
         </div>
       </header>
-
-      <section className="section" id="socials">
-        <div className="section-head">
-          <div className="section-num">02</div>
-          <h2 className="section-title">Connect <i>— socials</i></h2>
-          <p className="section-desc">Find me — coding and personal.</p>
-        </div>
-        <div className="pricing reveal" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
-          <a href="https://github.com/Peanut0920" target="_blank" rel="noopener noreferrer" className="price-card" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <h3><i className="fab fa-github" /> GitHub</h3>
-            <div className="sub">github.com/Peanut0920</div>
-            <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginTop: '.3rem' }}>Code, projects, and open source.</p>
-            <span className="link" style={{ marginTop: '.6rem' }}><i className="fas fa-arrow-up-right-from-square" /> Visit</span>
-          </a>
-          <a href="https://www.instagram.com/z_chengjun?igsi=MWR1ZGRka2R5bjd4Ng==" target="_blank" rel="noopener noreferrer" className="price-card" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <h3><i className="fab fa-instagram" /> Instagram — Personal</h3>
-            <div className="sub">@z_chengjun</div>
-            <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginTop: '.3rem' }}>Personal life and moments.</p>
-            <span className="link" style={{ marginTop: '.6rem' }}><i className="fas fa-arrow-up-right-from-square" /> Visit</span>
-          </a>
-          <a href="https://www.instagram.com/neonforge.ai.studio?igsi=MW8zbTJzcGJ1amYwdQ==" target="_blank" rel="noopener noreferrer" className="price-card" style={{ textDecoration: 'none', color: 'inherit' }}>
-            <h3><i className="fab fa-instagram" /> Instagram — Coding</h3>
-            <div className="sub">@neonforge.ai.studio</div>
-            <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginTop: '.3rem' }}>AI studio — builds and experiments.</p>
-            <span className="link" style={{ marginTop: '.6rem' }}><i className="fas fa-arrow-up-right-from-square" /> Visit</span>
-          </a>
-        </div>
-      </section>
-
-      <section className="section" id="education">
+<section className="section" id="education">
         <div className="section-head">
           <div className="section-label">Education</div>
           <h2 className="section-title">Foundation to <i>BSc AI</i></h2>
@@ -481,74 +453,91 @@ export default function App() {
         </div>
       </section>
 
-      <section className="section" id="skills">
+            <section className="section" id="skills">
         <div className="section-head">
-          <div className="section-label">Core Skills — as per resume</div>
-          <h2 className="section-title">Core <i>Skills</i></h2>
-          <p className="section-desc">Exactly as listed in resume.pdf — accounting, software, attributes, languages — with mathematic visualization.</p>
+          <div className="section-label">Core Skill</div>
+          <h2 className="section-title">Core <i>Skill</i></h2>
+          <p className="section-desc">LLM, Programming, Machine Learning and Core Competencies — minimal, luxury.</p>
         </div>
-        <div className="pricing reveal">
+        <div className="pricing reveal" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
           <div className="price-card">
-            <h3><i className="fas fa-book" /> Accounting Knowledge</h3>
-            <div className="sub">Resume · Core Skills</div>
-            <p style={{ fontSize: '.82rem', color: 'var(--muted)', lineHeight: 1.6, marginTop: '.3rem' }}>Understanding of double-entry bookkeeping, preparing trial balances, and basic financial statements (Income Statement, Balance Sheet).</p>
-            <div className="formula" style={{ marginTop: '.7rem', fontSize: '.68rem' }}>
-              Assets = Liabilities + Equity<br />
-              <span>double-entry · trial balance</span>
-            </div>
+            <h3><i className="fas fa-brain" /> LLM & Generative AI</h3>
+            <ul>
+              <li><i className="fas fa-check" /> Supervised Fine-Tuning (SFT) & PEFT/QLoRA</li>
+              <li><i className="fas fa-check" /> Reinforcement Learning from Human Feedback (RLHF) & PPO/DPO</li>
+              <li><i className="fas fa-check" /> Prompt Engineering & Instruction Tuning</li>
+              <li><i className="fas fa-check" /> LLM Evaluation (RAGAS, DeepEval, BLEU/ROUGE)</li>
+              <li><i className="fas fa-check" /> Model Deployment & Inference Optimization (vLLM, HuggingFace TGI)</li>
+            </ul>
           </div>
           <div className="price-card">
-            <h3><i className="fas fa-table-cells" /> Software Proficiency</h3>
-            <div className="sub">Resume · Core Skills</div>
-            <p style={{ fontSize: '.82rem', color: 'var(--muted)', lineHeight: 1.6, marginTop: '.3rem' }}>Proficient in Microsoft Excel (data entry, basic formulas), Word; a fast learner able to adapt to accounting software (e.g., SQL Accounting, Autocount, UBS).</p>
+            <h3><i className="fas fa-code" /> Programming & Data Science</h3>
             <ul>
-              <li><i className="fas fa-check" /> Excel — data entry, basic formulas</li>
-              <li><i className="fas fa-check" /> Word</li>
-              <li><i className="fas fa-check" /> SQL Accounting · Autocount · UBS — fast learner</li>
+              <li><i className="fas fa-check" /> Python (PyTorch, Transformers, Pandas, NumPy, Scikit-learn)</li>
+              <li><i className="fas fa-check" /> SQL & Data Manipulation</li>
+              <li><i className="fas fa-check" /> Data Mining & Feature Engineering</li>
+              <li><i className="fas fa-check" /> ETL Pipeline Development</li>
             </ul>
-            <canvas className="math-canvas" style={{ height: '72px', marginTop: '.4rem' }} ref={(el) => {
-              if (!el) return
-              const ctx = el.getContext('2d')
-              const dpr = Math.min(window.devicePixelRatio || 1, 1.6)
-              const r = el.getBoundingClientRect()
-              el.width = r.width * dpr
-              el.height = r.height * dpr
-              ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-              const bars = [86, 82, 78, 70, 62]
-              const labels = ['Python','ML','Data','NLP','C/C++']
-              const w = r.width, h = r.height
-              const bw = w / bars.length * 0.62
-              const gap = w / bars.length
-              bars.forEach((v, i) => {
-                const x = i * gap + gap * 0.19
-                const bh = (v / 100) * (h - 22)
-                const y = h - bh - 12
-                ctx.fillStyle = i === 0 ? 'rgba(201,168,106,0.95)' : i === 1 ? 'rgba(201,168,106,0.72)' : 'rgba(255,255,255,0.14)'
-                ctx.beginPath()
-                ctx.roundRect(x, y, bw, bh, [4, 4, 0, 0])
-                ctx.fill()
-                ctx.fillStyle = 'rgba(255,255,255,0.55)'
-                ctx.font = '7px JetBrains Mono'
-                ctx.textAlign = 'center'
-                ctx.fillText(labels[i], x + bw/2, h - 2)
-              })
-            }} />
           </div>
           <div className="price-card">
-            <h3><i className="fas fa-language" /> Languages</h3>
-            <div className="sub">Resume · Core Skills</div>
+            <h3><i className="fas fa-chart-line" /> Machine Learning & Mathematics</h3>
             <ul>
-              <li><i className="fas fa-check" /> Bahasa Malaysia</li>
-              <li><i className="fas fa-check" /> Mandarin — Fluent</li>
-              <li><i className="fas fa-check" /> English — Working Proficiency</li>
+              <li><i className="fas fa-check" /> Supervised & Unsupervised Learning</li>
+              <li><i className="fas fa-check" /> Deep Learning Architectures (CNNs, RNNs, Transformers)</li>
+              <li><i className="fas fa-check" /> Statistical Analysis & Probability Theory</li>
+              <li><i className="fas fa-check" /> Linear Algebra & Advanced Calculus</li>
             </ul>
-            <div style={{ marginTop: '.6rem', background: 'var(--surface-2)', border: '1px solid var(--line)', borderRadius: '10px', padding: '.6rem' }}>
-              <div style={{ fontFamily: 'var(--mono)', fontSize: '.68rem', color: 'var(--muted)', textAlign: 'center' }}>Personal Attributes</div>
-              <div style={{ fontSize: '.76rem', color: 'var(--text)', textAlign: 'center', marginTop: '.2rem', lineHeight: 1.6 }}>Detail-oriented, honest, reliable, responsible, eager to learn, with good time management and basic data analysis skills.</div>
-            </div>
+          </div>
+          <div className="price-card">
+            <h3><i className="fas fa-users" /> Core Competencies</h3>
+            <ul>
+              <li><i className="fas fa-check" /> AI Ethics & Responsible AI Alignment</li>
+              <li><i className="fas fa-check" /> Cross-functional Collaboration</li>
+              <li><i className="fas fa-check" /> Technical Documentation & Presentation</li>
+              <li><i className="fas fa-check" /> Research & Rapid Prototyping</li>
+            </ul>
           </div>
         </div>
       </section>
+
+<section className="section" id="work">
+        <div className="section-head">
+          <div className="section-label">Previous Work — Featured Projects</div>
+          <h2 className="section-title">Previous <i>Work</i></h2>
+          <p className="section-desc">4 featured builds — RL, LSTM, MCTS and data analysis across fields.</p>
+        </div>
+        <div className="pricing reveal" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
+          <div className="price-card">
+            <div style={{ width: '32px', height: '32px', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', color: 'var(--gold)', background: 'rgba(201,168,106,0.06)', borderRadius: '8px' }}><i className="fas fa-gamepad" /></div>
+            <h3>2D Pickle Ball — RL in Unity</h3>
+            <div className="sub">Reinforcement Learning · Unity ML-Agents</div>
+            <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginTop: '.3rem', lineHeight: 1.6 }}>Trained RL agent for 2D pickle ball — reward shaping, self-play, and policy optimization in Unity.</p>
+            <div><span className="tag">Unity</span><span className="tag">ML-Agents</span><span className="tag">PPO</span></div>
+          </div>
+          <div className="price-card">
+            <div style={{ width: '32px', height: '32px', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', color: 'var(--gold)', background: 'rgba(201,168,106,0.06)', borderRadius: '8px' }}><i className="fas fa-chart-line" /></div>
+            <h3>LSTM — TradingView Prediction</h3>
+            <div className="sub">Time Series · Deep Learning</div>
+            <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginTop: '.3rem', lineHeight: 1.6 }}>LSTM model to predict TradingView price movements — sequence modeling, normalization, and backtesting.</p>
+            <div><span className="tag">LSTM</span><span className="tag">Python</span><span className="tag">TradingView</span></div>
+          </div>
+          <div className="price-card">
+            <div style={{ width: '32px', height: '32px', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', color: 'var(--gold)', background: 'rgba(201,168,106,0.06)', borderRadius: '8px' }}><i className="fas fa-clover" /></div>
+            <h3>Texas Poker — MCTS</h3>
+            <div className="sub">Game AI · Search</div>
+            <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginTop: '.3rem', lineHeight: 1.6 }}>Monte Carlo Tree Search for Texas Hold’em — decision under uncertainty, simulation, and opponent modeling.</p>
+            <div><span className="tag">MCTS</span><span className="tag">Python</span><span className="tag">Game Theory</span></div>
+          </div>
+          <div className="price-card">
+            <div style={{ width: '32px', height: '32px', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', color: 'var(--gold)', background: 'rgba(201,168,106,0.06)', borderRadius: '8px' }}><i className="fas fa-database" /></div>
+            <h3>Data Analysis — Multi-field</h3>
+            <div className="sub">Analytics · Visualization</div>
+            <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginTop: '.3rem', lineHeight: 1.6 }}>Numerous analyses across different fields — cleaning, EDA, statistics, and storytelling with data.</p>
+            <div><span className="tag">pandas</span><span className="tag">SQL</span><span className="tag">Visualization</span></div>
+          </div>
+        </div>
+      </section>
+
 
       <section className="section" id="experience">
         <div className="section-head">
@@ -562,7 +551,6 @@ export default function App() {
             { role: 'President', org: 'First Aid Society', desc: 'First Aid Society — 1 Year', icon: 'fa-crown' },
             { role: 'Advisor', org: 'First Aid Society', desc: 'First Aid Society — 1 Year', icon: 'fa-user-tie' },
             { role: 'Vice President', org: 'Dragon & Lion Dance Troupe', desc: 'Dragon & Lion Dance Troupe — 1 Year', icon: 'fa-dragon' },
-            { role: 'Part-Time Cashier', org: 'Lapasta', desc: 'Lapasta — 1 Year', icon: 'fa-cash-register' },
             { role: 'Event Planner', org: 'Xnergy Sport Carnival', desc: 'Xnergy Sport Carnival', icon: 'fa-calendar-check' },
           ].map((e) => (
             <div key={e.role} className="exp-card" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: '12px', padding: '1rem', cursor: 'pointer' }} onClick={() => openModal('https://picsum.photos/800/600?random=' + e.role.length, e.role + ' — ' + e.org)}>
@@ -602,52 +590,41 @@ export default function App() {
         </div>
       </section>
 
-      <section className="section" id="work">
+<section className="section" id="socials">
         <div className="section-head">
-          <div className="section-label">Previous Work — Featured Projects</div>
-          <h2 className="section-title">Previous <i>Work</i></h2>
-          <p className="section-desc">4 featured builds — RL, LSTM, MCTS and data analysis across fields.</p>
+          <div className="section-num">02</div>
+          <h2 className="section-title">Connect <i>— socials</i></h2>
+          <p className="section-desc">Find me — coding and personal.</p>
         </div>
-        <div className="pricing reveal" style={{ gridTemplateColumns: 'repeat(2, 1fr)' }}>
-          <div className="price-card">
-            <div style={{ width: '32px', height: '32px', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', color: 'var(--gold)', background: 'rgba(201,168,106,0.06)', borderRadius: '8px' }}><i className="fas fa-gamepad" /></div>
-            <h3>2D Pickle Ball — RL in Unity</h3>
-            <div className="sub">Reinforcement Learning · Unity ML-Agents</div>
-            <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginTop: '.3rem', lineHeight: 1.6 }}>Trained RL agent for 2D pickle ball — reward shaping, self-play, and policy optimization in Unity.</p>
-            <div><span className="tag">Unity</span><span className="tag">ML-Agents</span><span className="tag">PPO</span></div>
-          </div>
-          <div className="price-card">
-            <div style={{ width: '32px', height: '32px', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', color: 'var(--gold)', background: 'rgba(201,168,106,0.06)', borderRadius: '8px' }}><i className="fas fa-chart-line" /></div>
-            <h3>LSTM — TradingView Prediction</h3>
-            <div className="sub">Time Series · Deep Learning</div>
-            <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginTop: '.3rem', lineHeight: 1.6 }}>LSTM model to predict TradingView price movements — sequence modeling, normalization, and backtesting.</p>
-            <div><span className="tag">LSTM</span><span className="tag">Python</span><span className="tag">TradingView</span></div>
-          </div>
-          <div className="price-card">
-            <div style={{ width: '32px', height: '32px', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', color: 'var(--gold)', background: 'rgba(201,168,106,0.06)', borderRadius: '8px' }}><i className="fas fa-clover" /></div>
-            <h3>Texas Poker — MCTS</h3>
-            <div className="sub">Game AI · Search</div>
-            <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginTop: '.3rem', lineHeight: 1.6 }}>Monte Carlo Tree Search for Texas Hold’em — decision under uncertainty, simulation, and opponent modeling.</p>
-            <div><span className="tag">MCTS</span><span className="tag">Python</span><span className="tag">Game Theory</span></div>
-          </div>
-          <div className="price-card">
-            <div style={{ width: '32px', height: '32px', border: '1px solid var(--line)', display: 'grid', placeItems: 'center', color: 'var(--gold)', background: 'rgba(201,168,106,0.06)', borderRadius: '8px' }}><i className="fas fa-database" /></div>
-            <h3>Data Analysis — Multi-field</h3>
-            <div className="sub">Analytics · Visualization</div>
-            <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginTop: '.3rem', lineHeight: 1.6 }}>Numerous analyses across different fields — cleaning, EDA, statistics, and storytelling with data.</p>
-            <div><span className="tag">pandas</span><span className="tag">SQL</span><span className="tag">Visualization</span></div>
-          </div>
+        <div className="pricing reveal" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
+          <a href="https://github.com/Peanut0920" target="_blank" rel="noopener noreferrer" className="price-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <h3><i className="fab fa-github" /> GitHub</h3>
+            <div className="sub">github.com/Peanut0920</div>
+            <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginTop: '.3rem' }}>Code, projects, and open source.</p>
+            <span className="link" style={{ marginTop: '.6rem' }}><i className="fas fa-arrow-up-right-from-square" /> Visit</span>
+          </a>
+          <a href="https://www.instagram.com/z_chengjun?igsi=MWR1ZGRka2R5bjd4Ng==" target="_blank" rel="noopener noreferrer" className="price-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <h3><i className="fab fa-instagram" /> Instagram — Personal</h3>
+            <div className="sub">@z_chengjun</div>
+            <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginTop: '.3rem' }}>Personal life and moments.</p>
+            <span className="link" style={{ marginTop: '.6rem' }}><i className="fas fa-arrow-up-right-from-square" /> Visit</span>
+          </a>
+          <a href="https://www.instagram.com/neonforge.ai.studio?igsi=MW8zbTJzcGJ1amYwdQ==" target="_blank" rel="noopener noreferrer" className="price-card" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <h3><i className="fab fa-instagram" /> Instagram — Coding</h3>
+            <div className="sub">@neonforge.ai.studio</div>
+            <p style={{ fontSize: '.82rem', color: 'var(--muted)', marginTop: '.3rem' }}>AI studio — builds and experiments.</p>
+            <span className="link" style={{ marginTop: '.6rem' }}><i className="fas fa-arrow-up-right-from-square" /> Visit</span>
+          </a>
         </div>
       </section>
-
-      <section className="cta">
+<section className="cta">
         <div>
           <h2>Start creating clear, concise notes <i>within minutes</i></h2>
           <p>Open to internships — AI, data, disciplined execution.</p>
         </div>
         <div className="cta-actions">
           <a className="btn-primary" href={import.meta.env.BASE_URL + 'Enson resume.pdf'} download><i className="fas fa-download" /> Get CV</a>
-          <a className="btn-ghost" href="tel:+60195897668"><i className="fas fa-phone" /> 019-589 7668</a>
+          <a className="btn-ghost" href="https://wa.me/qr/G25VRBSWXPBED1" target="_blank" rel="noopener noreferrer"><i className="fab fa-whatsapp" /> WhatsApp — 019-589 7668</a>
         </div>
       </section>
 
